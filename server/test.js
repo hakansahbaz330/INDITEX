@@ -67,6 +67,21 @@ assert.equal(zm[1].originalPrice, 79.9);
 assert.equal(zm[2].isLook, true);
 assert.equal(zm[3].comingSoon, true);
 
+// 2c) zara-scraper biçimi (beden bazlı talep işareti, çıkış tarihi, kumaş metni)
+const zs = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures', 'zara-scraper.json'), 'utf8')).map(mapItem);
+assert.ok(zs.every(Boolean));
+assert.equal(zs[0].id, 'zara:589443573');
+assert.equal(zs[0].sizes.length, 3);
+assert.equal(zs[0].launched, '2026-10-28');
+assert.equal(zs[0].composition, '%63 viscose, %37 polyester');
+assert.equal(zs[0].category, 'Elbise');
+assert.equal(zs[1].composition, '-');            // yalnızca astar bilgisi varsa dış kumaş bilinmiyor
+assert.equal(zs[2].category, 'Elbise');          // "blazer dress": kategori yolu elbise diyor
+assert.equal(zs[3].composition, '%100 acetate');
+assert.equal(mapItem({ ...JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures', 'zara-scraper.json'), 'utf8'))[0], composition: 'Not Disclosed' }).composition, '-');
+assert.equal(zs[0].demand, 'DEMAND_REGULAR');
+assert.equal(zs[0].originalPrice, null);         // "N/A"
+
 // 3) Çok günlü türetme
 const mk = (states, price) => ({ ...mapItem({ ...bs, product_id: 1, price, variants: states.map((s, i) => ({ size: String(i), is_buyable: true, back_soon: s === 'out', origin: 'MAROKKO' })) }), launched: '2026-01-01' });
 const d = { items: {}, syncs: [] };

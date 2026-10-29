@@ -6,7 +6,7 @@ export const dayDiff = (a, b) => Math.round((new Date(b) - new Date(a)) / 864000
 export function record(db, items, date = today()) {
   for (const it of items) {
     const e = (db.items[it.id] ??= { meta: {}, snaps: [] });
-    e.meta = { currency: it.currency, gender: it.gender, rank: it.rank, brand: it.brand, name: it.name, category: it.category, color: it.color, composition: it.composition, origin: it.origin, launched: it.launched, imageUrl: it.image };
+    e.meta = { demand: it.demand, currency: it.currency, gender: it.gender, rank: it.rank, brand: it.brand, name: it.name, category: it.category, color: it.color, composition: it.composition, origin: it.origin, launched: it.launched, imageUrl: it.image };
     const snap = {
       d: date, total: it.sizes.length, out: it.sizes.filter(s => s.state === 'out').length,
       low: it.sizes.filter(s => s.state === 'low').length, price: it.price, orig: it.originalPrice,
@@ -38,7 +38,7 @@ export function derive(db, now = today()) {
     while (hist.length < 12) hist.unshift(hist[0] ?? 0);
     return {
       id, brand: e.meta.brand, name: e.meta.name, category: e.meta.category, gender: e.meta.gender ?? 'Kadın',
-      color: e.meta.color, fabric: e.meta.composition, fit: '-', price: last.price ?? 0, currency: e.meta.currency ?? 'EUR',
+      color: e.meta.color, fabric: e.meta.composition, fit: '-', price: last.price ?? 0, currency: e.meta.currency ?? 'EUR', demand: e.meta.demand,
       origin: e.meta.origin, daysOnline: Math.max(0, dayDiff(startDay, now)),
       sizesTotal: total, sizesOut: Math.min(total, last.out + Math.round(last.low * 0.5)),
       soldOutDays, restocks, markdown: Math.round(markdown * 100) / 100,

@@ -10,6 +10,7 @@ export interface Product {
   fabric: string;
   fit: string;
   price: number;
+  demand?: string;         // Zara'nın beden bazlı talep işareti (varsa)
   currency?: string;       // EUR, USD …
   origin: string;          // ürün sayfasındaki "Made in"
   daysOnline: number;      // koleksiyona giriş yaşı

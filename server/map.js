@@ -31,6 +31,7 @@ const CAT = [
   [/shirt|blouse|bluse|hemd/i, 'Gömlek'], [/dress|kleid|jumpsuit/i, 'Elbise'], [/skirt|rock/i, 'Etek'],
   [/suit|set|co-?ord|tracksuit/i, 'Takım & Set'],
 ];
+export const matchCat = fam => CAT.find(([re]) => re.test(String(fam ?? '').replace(/Â/g, ' ')))?.[1] ?? null;
 export const categoryTR = fam => {
   const f = String(fam ?? '').replace(/Â/g, ' ');
   return CAT.find(([re]) => re.test(f))?.[1] ?? (f ? f.charAt(0) + f.slice(1).toLowerCase() : 'Diğer');
@@ -52,6 +53,47 @@ export function stockState(v) {
   if (/(out|sold|unavail|agotad|no[_ -]?stock)/.test(s)) return 'out';
   if (/(low|last|few|limited)/.test(s)) return 'low';
   return 'in';
+}
+
+const num = v => { const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[^\d.]/g, '')); return Number.isFinite(n) ? n : null; };
+
+// "OUTER SHELL: 63% viscose, 37% polyester | LINING: 100% polyester" → "%63 viscose, %37 polyester"
+function fabricFromString(s) {
+  const parts = String(s ?? '').split('|').map(x => x.trim()).filter(Boolean);
+  const outer = parts.find(p => !/^LINING|^Not Disclosed/i.test(p)) ?? '';
+  const txt = outer.replace(/^[A-Z ]+:\s*/, '').replace(/(\d+)%/g, '%$1');
+  return txt || '-';
+}
+
+/** Zara Scraper (productId, sizes[].demand, releaseDate alanlı) çıktısı: en zengin biçim. */
+function mapZaraScraper(raw) {
+  if (raw.error) return null;
+  const sec = String(raw.section ?? '');
+  const last = String(raw.categoryPath ?? '').split('>').pop();
+  const sizes = raw.sizes.map(s => ({ size: String(s.size), state: stockState(s.availability) }));
+  const demands = raw.sizes.map(s => String(s.demand ?? '')).filter(Boolean);
+  const rank = d => (/HIGH|PEAK|HOT/i.test(d) ? 2 : /LOW/i.test(d) ? 0 : 1);
+  const demand = demands.sort((a, b) => rank(b) - rank(a))[0];
+  return {
+    id: `zara:${raw.productId}`,
+    brand: 'Zara',
+    name: raw.name ?? `Ürün ${raw.displayReference}`,
+    category: matchCat(last) ?? categoryTR([raw.family, raw.subfamily, raw.name].filter(Boolean).join(' ')),
+    gender: /KID|BOY|GIRL|BABY|CHILD|NI[ÑN]/i.test(sec) ? 'Çocuk' : /^MAN|^MEN|HOMBRE/i.test(sec) ? 'Erkek' : 'Kadın',
+    color: raw.colorName ?? '-',
+    composition: fabricFromString(raw.composition),
+    origin: '-',
+    price: num(raw.price),
+    originalPrice: num(raw.oldPrice),
+    currency: raw.currency ?? 'EUR',
+    launched: raw.releaseDate ? String(raw.releaseDate).slice(0, 10) : null,
+    rank: null,
+    demand,
+    comingSoon: /coming/i.test(String(raw.availability)),
+    isLook: false,
+    sizes,
+    image: String(raw.imageUrl ?? raw.imageUrls?.[0] ?? '').replace(/w=\d+/, 'w=400'),
+  };
 }
 
 /** rl1987/zara-api-scraper çıktısı (Zara'ya özel). Detay modu (PDP) kapalıysa beden, kumaş ve menşe gelmez. */
@@ -83,6 +125,7 @@ function mapZaraApi(raw) {
 }
 
 export function mapItem(raw) {
+  if (raw?.product_id == null && raw?.productId !== undefined && Array.isArray(raw?.sizes)) return mapZaraScraper(raw);
   if (raw?.product_id == null && raw?.id != null && raw?.availability !== undefined && raw?.reference) return mapZaraApi(raw);
   if (raw?.product_id == null) return null;
   const comingSoon = raw.visibility === 'COMING_SOON';
