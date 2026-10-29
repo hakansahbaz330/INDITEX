@@ -1,0 +1,4 @@
+{
+  "_not": "Bu dosyayı server/input.json olarak kopyalayın ve Apify konsolundaki 'JSON' sekmesinin içeriğiyle değiştirin. Alan adları aktöre aittir, tahmin etmeyin.",
+  "brands": ["Zara"]
+}

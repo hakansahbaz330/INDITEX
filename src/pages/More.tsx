@@ -3,7 +3,7 @@ import type { Store } from '../store';
 import { CSV_TEMPLATE, parseImport } from '../store';
 import { DEFAULT_WEIGHTS, WEIGHT_LABELS } from '../scoring';
 import { makeSeed } from '../seed';
-import type { Weights } from '../types';
+import type { Product, Weights } from '../types';
 
 const SOURCES = [
   { n: 'Hazır toplayıcılar (Apify: Inditex Product Scraper vb.)', v: 'Yüksek', r: 'Orta-Yüksek', d: '7 marka, beden bazlı stok durumu, fiyat, kumaş. Stok çoğunlukla katalog durumudur, mağaza adedi değildir. Günlük çekimle tükenme hızı türetilir. Ters mühendislik kullananlar daha riskli.' },
@@ -34,6 +34,28 @@ export default function More({ s }: { s: Store }) {
   const [tab, setTab] = useState<'kaynak' | 'yol' | 'ayar'>('kaynak');
   const [txt, setTxt] = useState('');
   const [msg, setMsg] = useState('');
+  const [srv, setSrv] = useState(() => { try { return JSON.parse(localStorage.getItem('ir.server') ?? '{}'); } catch { return {}; } });
+  const [busy, setBusy] = useState(false);
+  const [live, setLive] = useState('');
+  const saveSrv = (v: { url?: string; key?: string }) => { setSrv(v); try { localStorage.setItem('ir.server', JSON.stringify(v)); } catch { /* yoksay */ } };
+  const call = async (path: string, init?: RequestInit) => {
+    const r = await fetch(`${srv.url ?? ''}${path}`, { ...init, headers: { 'x-app-key': srv.key ?? '' } });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error ?? `HTTP ${r.status}`);
+    return j;
+  };
+  const pull = async (sync: boolean) => {
+    setBusy(true); setLive('');
+    try {
+      let info = '';
+      if (sync) { const r = await call('/api/sync', { method: 'POST' }); info = `Apify'dan ${r.fetched} ürün çekildi (${r.skipped} atlandı). `; }
+      const j = await call('/api/products');
+      if (!j.products.length) { setLive(`${info}Sunucuda henüz kayıtlı ürün yok; mevcut veri korundu.`); setBusy(false); return; }
+      s.setProducts(j.products as Product[]);
+      setLive(`${info}${j.products.length} ürün yüklendi · ${j.syncs.length ? 'son çekim ' + j.syncs[j.syncs.length - 1].d : 'henüz çekim yok'}`);
+    } catch (e) { setLive(`Hata: ${(e as Error).message}`); }
+    setBusy(false);
+  };
 
   const doImport = (replace: boolean) => {
     try {
@@ -67,6 +89,17 @@ export default function More({ s }: { s: Store }) {
 
       {tab === 'ayar' && (
         <>
+          <section className="card">
+            <h3>Canlı veri (sunucu)</h3>
+            <p className="hint">Sunucu Apify'dan günlük çekim yapıp anlık görüntüleri saklar; tükenme hızı bu geçmişten hesaplanır. Aynı adresten açtıysanız adres alanını boş bırakın.</p>
+            <input className="search" placeholder="Sunucu adresi (boş = bu adres)" value={srv.url ?? ''} onChange={e => saveSrv({ ...srv, url: e.target.value.replace(/\/$/, '') })} />
+            <input className="search" type="password" placeholder="Uygulama parolası (APP_KEY, varsa)" value={srv.key ?? ''} onChange={e => saveSrv({ ...srv, key: e.target.value })} />
+            <div className="row">
+              <button className="btn" disabled={busy} onClick={() => pull(false)}>Kayıtlı veriyi yükle</button>
+              <button className="btn ghost" disabled={busy} onClick={() => confirm("Apify çalıştırılır ve maliyet doğurur. Devam?") && pull(true)}>Şimdi Apify'dan çek</button>
+            </div>
+            {live && <p className="hint">{live}</p>}
+          </section>
           <section className="card">
             <h3>Skor ağırlıkları</h3>
             {(Object.keys(DEFAULT_WEIGHTS) as (keyof Weights)[]).map(k => (

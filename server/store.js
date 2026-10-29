@@ -1,0 +1,62 @@
+// Günlük anlık görüntüleri JSON dosyasında tutar ve uygulamanın Product şemasına türetir.
+import fs from 'node:fs';
+import path from 'node:path';
+
+const FILE = process.env.DATA_FILE || path.join(import.meta.dirname, 'data', 'snapshots.json');
+
+export function load() {
+  try { return JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch { return { items: {}, syncs: [] }; }
+}
+export function save(db) {
+  fs.mkdirSync(path.dirname(FILE), { recursive: true });
+  fs.writeFileSync(FILE, JSON.stringify(db));
+}
+
+const today = () => new Date().toISOString().slice(0, 10);
+const dayDiff = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+
+/** Haritalanmış ürünleri bugünün anlık görüntüsü olarak kaydeder. */
+export function record(db, items, date = today()) {
+  for (const it of items) {
+    const e = (db.items[it.id] ??= { meta: {}, snaps: [] });
+    e.meta = { brand: it.brand, name: it.name, category: it.category, color: it.color, composition: it.composition, origin: it.origin, launched: it.launched, image: it.image };
+    const snap = {
+      d: date, total: it.sizes.length, out: it.sizes.filter(s => s.state === 'out').length,
+      low: it.sizes.filter(s => s.state === 'low').length, price: it.price, orig: it.originalPrice,
+    };
+    const i = e.snaps.findIndex(s => s.d === date);
+    if (i >= 0) e.snaps[i] = snap; else e.snaps.push(snap);
+    e.snaps.sort((a, b) => a.d.localeCompare(b.d));
+  }
+  db.syncs.push({ d: date, n: items.length });
+  db.syncs = db.syncs.slice(-400);
+}
+
+const ICON = { Triko: '🧶', Denim: '👖', Pantolon: '👖', Gömlek: '👔', Elbise: '👗', Etek: '🪭' };
+
+/** Anlık görüntü geçmişinden uygulama sinyallerini türetir. */
+export function derive(db, now = today()) {
+  return Object.entries(db.items).map(([id, e]) => {
+    const s = e.snaps, first = s[0], last = s[s.length - 1];
+    const startDay = e.meta.launched || first.d;
+    const total = Math.max(1, last.total);
+    // İlk görüntüde zaten tükenmişse tükenme zamanı bilinmez; hızı şişirmemek için null.
+    const firstOut = s.find(x => x.out > 0 || x.low > 0);
+    const soldOutDays = !firstOut ? null : firstOut === first && !e.meta.launched ? null : Math.max(1, dayDiff(startDay, firstOut.d));
+    let restocks = 0;
+    for (let i = 1; i < s.length; i++) if (s[i - 1].out > s[i].out && s[i - 1].out > 0) restocks++;
+    const maxPrice = Math.max(...s.map(x => x.orig ?? x.price ?? 0), 0);
+    const markdown = maxPrice && last.price ? Math.max(0, 1 - last.price / maxPrice) : 0;
+    const hist = s.slice(-12).map(x => Math.round(((x.out + x.low * 0.5) / Math.max(1, x.total)) * 100));
+    while (hist.length < 12) hist.unshift(hist[0] ?? 0);
+    return {
+      id, brand: e.meta.brand, name: e.meta.name, category: e.meta.category, gender: 'Kadın',
+      color: e.meta.color, fabric: e.meta.composition, fit: '-', price: last.price ?? 0,
+      origin: e.meta.origin, daysOnline: Math.max(0, dayDiff(startDay, now)),
+      sizesTotal: total, sizesOut: Math.min(total, last.out + Math.round(last.low * 0.5)),
+      soldOutDays, restocks, markdown: Math.round(markdown * 100) / 100,
+      adIntensity: 0, searchTrend: 0, trendDelta: 0, history: hist,
+      image: ICON[e.meta.category] ?? '🧵', snapshots: s.length,
+    };
+  });
+}

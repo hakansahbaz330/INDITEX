@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "server": "node server/index.js",
+    "test:server": "node server/test.js"
   },
   "dependencies": {
     "react": "^18.3.1",
