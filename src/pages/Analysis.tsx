@@ -2,6 +2,8 @@ import type { Store } from '../store';
 import { groupAvg, score } from '../scoring';
 import { originFlag } from '../ui';
 import type { Product } from '../types';
+import FilterBar from '../FilterBar';
+import { groupOf, knitOf, passes } from '../classify';
 
 function Rank({ title, data }: { title: string; data: { key: string; n: number; avg: number }[] }) {
   return (
@@ -19,7 +21,7 @@ function Rank({ title, data }: { title: string; data: { key: string; n: number; 
 }
 
 export default function Analysis({ s }: { s: Store }) {
-  const P = s.products;
+  const P = s.products.filter(p => passes(p, s.filters));
   const by = (f: (p: Product) => string) => groupAvg(P, s.weights, f);
   const origins = new Map<string, number>();
   P.filter(p => score(p, s.weights) >= 55).forEach(p => origins.set(p.origin, (origins.get(p.origin) ?? 0) + 1));
@@ -28,8 +30,12 @@ export default function Analysis({ s }: { s: Store }) {
 
   return (
     <>
-      <p className="hint">Ortalama fırsat skoru (0–100). Parantez içi: örnek sayısı.</p>
-      <Rank title="Kategori ısı haritası" data={by(p => p.category)} />
+      <FilterBar s={s} />
+      <p className="hint">{P.length} ürün üzerinden. Ortalama fırsat skoru (0–100). Parantez içi: örnek sayısı.</p>
+      <Rank title="Ürün grubu" data={by(p => groupOf(p))} />
+      <Rank title="Cinsiyet" data={by(p => p.gender)} />
+      <Rank title="Örme / penye mi?" data={by(p => ({ kesin: 'Örme/penye (kesin)', olası: 'Örme/penye (olası)', dokuma: 'Dokuma' })[knitOf(p)])} />
+      <Rank title="Ürün türü ısı haritası" data={by(p => p.category)} />
       <Rank title="Marka" data={by(p => p.brand)} />
       <Rank title="Renk" data={by(p => p.color)} />
       <Rank title="Kumaş" data={by(p => p.fabric)} />

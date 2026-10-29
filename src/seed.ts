@@ -5,8 +5,10 @@ function rng(seed: number) { return () => ((seed = (seed * 1664525 + 1013904223)
 
 const BRANDS: Brand[] = ['Zara', 'Bershka', 'Pull&Bear', 'Stradivarius', 'Massimo Dutti', 'Oysho'];
 const CATS: { cat: string; icon: string; items: string[]; gender: 'Kadın' | 'Erkek'; fabrics: string[] }[] = [
-  { cat: 'Triko', icon: '🧶', items: ['Kablo Örgü Kazak', 'Yarım Fermuarlı Triko', 'Oversize Hırka', 'Balıkçı Yaka Kazak'], gender: 'Kadın', fabrics: ['%50 Yün %50 Akrilik', '%100 Pamuk', 'Viskon Karışım'] },
-  { cat: 'Ceket & Mont', icon: '🧥', items: ['Deri Efektli Bomber', 'Oversize Blazer', 'Şişme Mont', 'Trençkot'], gender: 'Kadın', fabrics: ['Poliüretan', '%100 Polyester', 'Pamuk Gabardin'] },
+  { cat: 'Triko', icon: '🧶', items: ['Kablo Örgü Kazak', 'Yarım Fermuarlı Triko', 'Balıkçı Yaka Kazak', 'Fitilli Örme Kazak'], gender: 'Kadın', fabrics: ['%50 Yün %50 Akrilik', '%100 Pamuk', 'Viskon Karışım'] },
+  { cat: 'Hırka', icon: '🧥', items: ['Oversize Örgü Hırka', 'Kısa Triko Hırka', 'Uzun Penye Hırka'], gender: 'Kadın', fabrics: ['%60 Pamuk %40 Akrilik', 'Viskon Elastan', '%100 Pamuk'] },
+  { cat: 'Yelek', icon: '🦺', items: ['Örgü Yelek', 'Şişme Yelek', 'Kürk Efektli Yelek'], gender: 'Kadın', fabrics: ['Akrilik Karışım', 'Polyester', 'Pamuk Elastan'] },
+  { cat: 'Ceket & Mont', icon: '🧥', items: ['Deri Efektli Bomber', 'Oversize Blazer', 'Şişme Mont', 'Trençkot', 'Örme Kumaş Ceket', 'Peluş Kaban'], gender: 'Kadın', fabrics: ['Poliüretan', '%100 Polyester', 'Pamuk Gabardin'] },
   { cat: 'Pantolon', icon: '👖', items: ['Wide Leg Pantolon', 'Kargo Pantolon', 'Paraşüt Pantolon', 'Pileli Pantolon'], gender: 'Erkek', fabrics: ['%100 Pamuk', 'Naylon', 'Polyester Viskon'] },
   { cat: 'Denim', icon: '🩳', items: ['Baggy Jean', 'Straight Fit Jean', 'Denim Ceket', 'Mom Fit Jean'], gender: 'Kadın', fabrics: ['%100 Pamuk Denim', 'Elastanlı Denim'] },
   { cat: 'Gömlek', icon: '👔', items: ['Poplin Gömlek', 'Keten Gömlek', 'Oversize Gömlek', 'Çizgili Gömlek'], gender: 'Erkek', fabrics: ['%100 Keten', 'Pamuk Poplin', 'Viskon'] },
@@ -20,7 +22,7 @@ const COLORS = ['Ekru', 'Siyah', 'Haki', 'Bordo', 'Taba', 'Gri Melanj', 'Çikola
 const FITS = ['Oversize', 'Regular', 'Relaxed', 'Slim', 'Boxy', 'Wide Leg'];
 const ORIGINS = ['Türkiye', 'Türkiye', 'Türkiye', 'Fas', 'Fas', 'Portekiz', 'Çin', 'Bangladeş', 'Hindistan', 'Vietnam', 'Mısır', 'Pakistan'];
 
-export function makeSeed(n = 54): Product[] {
+export function makeSeed(n = 90): Product[] {
   const r = rng(42);
   const pick = <T,>(a: T[]) => a[Math.floor(r() * a.length)];
   return Array.from({ length: n }, (_, i) => {
@@ -36,7 +38,7 @@ export function makeSeed(n = 54): Product[] {
       brand: pick(BRANDS),
       name: pick(c.items),
       category: c.cat,
-      gender: c.gender,
+      gender: (() => { const g = r(); return c.cat === 'Ceket & Mont' || c.cat === 'Hırka' || c.cat === 'Yelek' ? (g < 0.75 ? 'Kadın' : g < 0.92 ? 'Erkek' : 'Çocuk') : (g < 0.5 ? 'Kadın' : g < 0.85 ? 'Erkek' : 'Çocuk'); })() as Product['gender'],
       color: pick(COLORS),
       fabric: pick(c.fabrics),
       fit: pick(FITS),

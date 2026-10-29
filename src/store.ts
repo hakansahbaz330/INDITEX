@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Product, Sample, Weights } from './types';
 import { DEFAULT_WEIGHTS } from './scoring';
+import { DEFAULT_FILTERS, type Filters } from './classify';
 import { makeSeed } from './seed';
 
 function useLocal<T>(key: string, init: () => T): [T, (v: T) => void] {
@@ -13,11 +14,13 @@ function useLocal<T>(key: string, init: () => T): [T, (v: T) => void] {
 }
 
 export function useStore() {
-  const [products, setProducts] = useLocal<Product[]>('ir.products', () => makeSeed());
+  const [products, setProducts] = useLocal<Product[]>('ir.products2', () => makeSeed());
   const [samples, setSamples] = useLocal<Sample[]>('ir.samples', () => []);
-  const [weights, setWeights] = useLocal<Weights>('ir.weights', () => DEFAULT_WEIGHTS);
+  const [w, setWeights] = useLocal<Weights>('ir.weights', () => DEFAULT_WEIGHTS);
+  const weights = { ...DEFAULT_WEIGHTS, ...w };
+  const [filters, setFilters] = useLocal<Filters>('ir.filters', () => DEFAULT_FILTERS);
   const [watch, setWatch] = useLocal<string[]>('ir.watch', () => []);
-  return { products, setProducts, samples, setSamples, weights, setWeights, watch, setWatch };
+  return { products, setProducts, samples, setSamples, weights, setWeights, watch, setWatch, filters, setFilters };
 }
 export type Store = ReturnType<typeof useStore>;
 
@@ -37,7 +40,7 @@ export function parseImport(text: string): Product[] {
     brand: (r.brand as Product['brand']) || 'Zara',
     name: String(r.name ?? 'Adsız ürün'),
     category: String(r.category ?? 'Diğer'),
-    gender: (r.gender as Product['gender']) || 'Kadın',
+    gender: (['Kadın', 'Erkek', 'Çocuk'].includes(r.gender) ? r.gender : 'Kadın') as Product['gender'],
     color: String(r.color ?? '-'), fabric: String(r.fabric ?? '-'), fit: String(r.fit ?? '-'),
     price: num(r.price), origin: String(r.origin ?? '-'),
     daysOnline: num(r.daysOnline, 7), sizesTotal: num(r.sizesTotal, 6), sizesOut: num(r.sizesOut),

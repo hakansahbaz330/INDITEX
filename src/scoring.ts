@@ -1,10 +1,11 @@
 import type { Product, Weights } from './types';
+import { fitMatch } from './classify';
 
-export const DEFAULT_WEIGHTS: Weights = { sellOut: 30, speed: 20, ads: 12, search: 10, restock: 10, fullPrice: 10, fresh: 8 };
+export const DEFAULT_WEIGHTS: Weights = { sellOut: 30, speed: 20, ads: 12, search: 10, restock: 10, fullPrice: 10, fresh: 8, fit: 15 };
 
 export const WEIGHT_LABELS: Record<keyof Weights, string> = {
   sellOut: 'Beden tükenme oranı', speed: 'Tükenme hızı', ads: 'Reklam yoğunluğu',
-  search: 'Arama trendi', restock: 'Yeniden stok', fullPrice: 'İndirimsiz satış', fresh: 'Yenilik',
+  search: 'Arama trendi', restock: 'Yeniden stok', fullPrice: 'İndirimsiz satış', fresh: 'Yenilik', fit: 'Üretim uyumu (örme · kadın · dış giyim)',
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
@@ -18,6 +19,7 @@ export function signals(p: Product): Record<keyof Weights, number> {
     restock: clamp(p.restocks * 35),
     fullPrice: clamp(100 - p.markdown * 250),
     fresh: clamp(100 - (p.daysOnline / 60) * 100),
+    fit: fitMatch(p),
   };
 }
 

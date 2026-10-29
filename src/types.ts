@@ -5,7 +5,7 @@ export interface Product {
   brand: Brand | string;
   name: string;
   category: string;
-  gender: 'Kadın' | 'Erkek';
+  gender: 'Kadın' | 'Erkek' | 'Çocuk';
   color: string;
   fabric: string;
   fit: string;
@@ -27,7 +27,7 @@ export interface Product {
 }
 
 export interface Weights {
-  sellOut: number; speed: number; ads: number; search: number; restock: number; fullPrice: number; fresh: number;
+  sellOut: number; speed: number; ads: number; search: number; restock: number; fullPrice: number; fresh: number; fit: number;
 }
 
 export type SampleStatus = 'Hazırlanıyor' | 'Gönderildi' | 'Onaylandı' | 'Reddedildi';

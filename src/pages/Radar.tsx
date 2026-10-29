@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import type { Store } from '../store';
 import type { Brand, Product, Sample } from '../types';
 import { WEIGHT_LABELS, groupAvg, score, signals, stockoutEta, verdict } from '../scoring';
+import FilterBar from '../FilterBar';
+import { groupOf, knitOf, passes } from '../classify';
 import { Badge, Bar, ScoreRing, Spark, originFlag, proximity } from '../ui';
 
 const BRANDS: ('Hepsi' | Brand)[] = ['Hepsi', 'Zara', 'Bershka', 'Pull&Bear', 'Stradivarius', 'Massimo Dutti', 'Oysho'];
@@ -13,14 +15,14 @@ export default function Radar({ s }: { s: Store }) {
   const [onlyWatch, setOnlyWatch] = useState(false);
   const [sel, setSel] = useState<Product | null>(null);
 
-  const cats = useMemo(() => ['Hepsi', ...new Set(s.products.map(p => p.category))], [s.products]);
+  const cats = useMemo(() => ['Hepsi', ...new Set(s.products.filter(p => passes(p, s.filters)).map(p => p.category))], [s.products, s.filters]);
   const rows = useMemo(() =>
     s.products
-      .filter(p => (brand === 'Hepsi' || p.brand === brand) && (cat === 'Hepsi' || p.category === cat)
+      .filter(p => passes(p, s.filters) && (brand === 'Hepsi' || p.brand === brand) && (cat === 'Hepsi' || p.category === cat)
         && (!onlyWatch || s.watch.includes(p.id)) && (p.name + p.color + p.category).toLowerCase().includes(q.toLowerCase()))
       .map(p => ({ p, sc: score(p, s.weights) }))
       .sort((a, b) => b.sc - a.sc),
-    [s.products, s.weights, s.watch, brand, cat, q, onlyWatch]);
+    [s.products, s.weights, s.watch, s.filters, brand, cat, q, onlyWatch]);
 
   const hot = rows.filter(r => r.sc >= 70).length;
   const soon = rows.filter(r => r.p.sizesOut > 0 && r.p.sizesOut < r.p.sizesTotal && r.sc >= 55).length;
@@ -28,10 +30,11 @@ export default function Radar({ s }: { s: Store }) {
   return (
     <>
       <section className="tiles">
-        <div><b>{rows.length}</b><span>Takipte ürün</span></div>
+        <div><b>{rows.length}</b><span>Filtredeki ürün</span></div>
         <div><b className="t-hot">{hot}</b><span>Acil fırsat</span></div>
         <div><b className="t-warm">{soon}</b><span>Tükenmek üzere</span></div>
       </section>
+      <FilterBar s={s} />
       <input className="search" placeholder="Ürün, renk, kategori ara…" value={q} onChange={e => setQ(e.target.value)} />
       <div className="chips">{BRANDS.map(b => <button key={b} className={brand === b ? 'on' : ''} onClick={() => setBrand(b)}>{b}</button>)}</div>
       <div className="row">
@@ -44,14 +47,14 @@ export default function Radar({ s }: { s: Store }) {
             <div className="thumb">{p.imageUrl ? <img src={p.imageUrl} alt="" loading="lazy" /> : p.image}</div>
             <div className="meta">
               <b>{p.name}</b>
-              <small>{p.brand} · {p.category} · {p.color}</small>
+              <small>{p.brand} · {p.gender} · {p.category} · {p.color}</small>
               <small>{originFlag(p.origin)} {p.origin} · {p.sizesOut}/{p.sizesTotal} beden tükendi · {stockoutEta(p)}</small>
               <Badge v={verdict(sc, p)} />
             </div>
             <ScoreRing value={sc} />
           </li>
         ))}
-        {!rows.length && <p className="empty">Filtreye uyan ürün yok.</p>}
+        {!rows.length && <p className="empty">Filtreye uyan ürün yok. Yukarıdan “Hepsi” seçerek filtreyi gevşetebilirsiniz.</p>}
       </ul>
       {sel && <Detail p={sel} s={s} onClose={() => setSel(null)} />}
     </>
@@ -83,7 +86,7 @@ function Detail({ p, s, onClose }: { p: Product; s: Store; onClose: () => void }
         <button className="close" onClick={onClose} aria-label="Kapat">✕</button>
         <div className="sheet-head">
           <div className="thumb big">{p.imageUrl ? <img src={p.imageUrl} alt="" /> : p.image}</div>
-          <div><h2>{p.name}</h2><small>{p.brand} · {p.category} · {p.gender}</small><br /><Badge v={verdict(sc, p)} /></div>
+          <div><h2>{p.name}</h2><small>{p.brand} · {p.gender} · {p.category} · {groupOf(p)}</small><br /><Badge v={verdict(sc, p)} /></div>
           <ScoreRing value={sc} />
         </div>
         <div className="kv">
@@ -91,6 +94,7 @@ function Detail({ p, s, onClose }: { p: Product; s: Store; onClose: () => void }
           <div><span>Renk</span><b>{p.color}</b></div>
           <div><span>Kumaş</span><b>{p.fabric}</b></div>
           <div><span>Kalıp</span><b>{p.fit}</b></div>
+          <div><span>Örme / penye</span><b>{({ kesin: 'Evet', olası: 'Olası (kumaşa göre tahmin)', dokuma: 'Hayır (dokuma)' })[knitOf(p)]}</b></div>
           <div><span>Üretim yeri</span><b>{originFlag(p.origin)} {p.origin}{proximity(p) ? ' · yakın tedarik' : ''}</b></div>
           <div><span>Koleksiyonda</span><b>{p.daysOnline} gün</b></div>
           <div><span>Tahmini tükenme</span><b>{stockoutEta(p)}</b></div>
