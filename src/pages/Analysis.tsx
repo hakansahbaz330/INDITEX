@@ -3,6 +3,7 @@ import { groupAvg, score } from '../scoring';
 import { originFlag } from '../ui';
 import type { Product } from '../types';
 import FilterBar from '../FilterBar';
+import Empty from '../Empty';
 import { groupOf, knitOf, passes } from '../classify';
 
 function Rank({ title, data }: { title: string; data: { key: string; n: number; avg: number }[] }) {
@@ -20,7 +21,7 @@ function Rank({ title, data }: { title: string; data: { key: string; n: number; 
   );
 }
 
-export default function Analysis({ s }: { s: Store }) {
+export default function Analysis({ s, go }: { s: Store; go: () => void }) {
   const P = s.products.filter(p => passes(p, s.filters));
   const by = (f: (p: Product) => string) => groupAvg(P, s.weights, f);
   const origins = new Map<string, number>();
@@ -28,6 +29,7 @@ export default function Analysis({ s }: { s: Store }) {
   const oTotal = [...origins.values()].reduce((a, b) => a + b, 0) || 1;
   const oRows = [...origins].sort((a, b) => b[1] - a[1]);
 
+  if (!s.products.length) return <Empty go={go} />;
   return (
     <>
       <FilterBar s={s} />

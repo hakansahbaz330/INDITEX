@@ -3,12 +3,13 @@ import type { Store } from '../store';
 import type { Brand, Product, Sample } from '../types';
 import { WEIGHT_LABELS, groupAvg, score, signals, stockoutEta, verdict } from '../scoring';
 import FilterBar from '../FilterBar';
+import Empty from '../Empty';
 import { groupOf, knitOf, passes } from '../classify';
 import { Badge, Bar, ScoreRing, Spark, originFlag, proximity } from '../ui';
 
 const BRANDS: ('Hepsi' | Brand)[] = ['Hepsi', 'Zara', 'Bershka', 'Pull&Bear', 'Stradivarius', 'Massimo Dutti', 'Oysho'];
 
-export default function Radar({ s }: { s: Store }) {
+export default function Radar({ s, go }: { s: Store; go: () => void }) {
   const [brand, setBrand] = useState<'Hepsi' | Brand>('Hepsi');
   const [cat, setCat] = useState('Hepsi');
   const [q, setQ] = useState('');
@@ -27,6 +28,7 @@ export default function Radar({ s }: { s: Store }) {
   const hot = rows.filter(r => r.sc >= 70).length;
   const soon = rows.filter(r => r.p.sizesOut > 0 && r.p.sizesOut < r.p.sizesTotal && r.sc >= 55).length;
 
+  if (!s.products.length) return <Empty go={go} />;
   return (
     <>
       <section className="tiles">

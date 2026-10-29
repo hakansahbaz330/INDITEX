@@ -3,9 +3,8 @@ import type { Product, Sample, Weights } from './types';
 import { DEFAULT_WEIGHTS } from './scoring';
 import { DEFAULT_FILTERS, type Filters } from './classify';
 import { emptyDB, type SnapDB } from './apifyImport';
-import { makeSeed } from './seed';
 
-function useLocal<T>(key: string, init: () => T): [T, (v: T) => void] {
+export function useLocal<T>(key: string, init: () => T): [T, (v: T) => void] {
   const [v, setV] = useState<T>(() => {
     try { const s = localStorage.getItem(key); if (s) return JSON.parse(s) as T; } catch { /* yoksay */ }
     return init();
@@ -15,7 +14,7 @@ function useLocal<T>(key: string, init: () => T): [T, (v: T) => void] {
 }
 
 export function useStore() {
-  const [products, setProducts] = useLocal<Product[]>('ir.products2', () => makeSeed());
+  const [products, setProducts] = useLocal<Product[]>('ir.products3', () => []);
   const [samples, setSamples] = useLocal<Sample[]>('ir.samples', () => []);
   const [w, setWeights] = useLocal<Weights>('ir.weights', () => DEFAULT_WEIGHTS);
   const weights = { ...DEFAULT_WEIGHTS, ...w };

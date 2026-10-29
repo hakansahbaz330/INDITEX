@@ -5,7 +5,7 @@
 *{box-sizing:border-box}body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 .app{max-width:640px;margin:0 auto;min-height:100vh;padding-bottom:84px}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;justify-content:space-between;align-items:center;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--bg);border-bottom:1px solid var(--line)}
-.top small{display:block;color:var(--mute);font-size:12px}.demo-pill{background:var(--warm);color:#000;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px}
+.top small{display:block;color:var(--mute);font-size:12px}
 main{padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .tabbar{position:fixed;bottom:0;left:0;right:0;display:flex;max-width:640px;margin:0 auto;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tabbar button{flex:1;background:none;border:0;color:var(--mute);padding:8px 0;font-size:11px;display:flex;flex-direction:column;gap:2px;align-items:center}.tabbar span{font-size:20px}.tabbar .on{color:var(--accent)}
@@ -47,3 +47,4 @@ pre{background:var(--bg);padding:8px;border-radius:8px;overflow:auto;font-size:1
 .fbar .chips{padding:4px 0}.chips small{opacity:.7;margin-left:4px;color:inherit}
 details.card summary{cursor:pointer}input[type=file]{width:100%;margin:8px 0;color:var(--text)}
 .thumb{position:relative}.thumb img{position:absolute;inset:0}
+.count-pill{font-size:12px;color:var(--mute);border:1px solid var(--line);padding:3px 10px;border-radius:99px}.empty-state{text-align:center;padding:32px 8px}.empty-state h3{margin:0 0 8px}.empty-state ol{text-align:left;max-width:340px;margin:12px auto;color:var(--mute);font-size:14px;display:grid;gap:6px}.cal-row i.btn-cell{cursor:pointer}

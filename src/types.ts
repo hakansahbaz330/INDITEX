@@ -23,7 +23,6 @@ export interface Product {
   history: number[];       // son 12 hafta "tükenme oranı" 0..100
   image: string;           // emoji/ikon yer tutucu
   imageUrl?: string;       // ürün fotoğrafı (canlı veri)
-  demo?: boolean;
 }
 
 export interface Weights {

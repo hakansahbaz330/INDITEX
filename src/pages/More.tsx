@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { Store } from '../store';
 import { CSV_TEMPLATE, parseImport } from '../store';
 import { DEFAULT_WEIGHTS, WEIGHT_LABELS } from '../scoring';
-import { makeSeed } from '../seed';
 import type { Product, Weights } from '../types';
 import { importApify } from '../apifyImport';
 
@@ -76,7 +75,7 @@ export default function More({ s }: { s: Store }) {
   const doImport = (replace: boolean) => {
     try {
       const items = parseImport(txt);
-      s.setProducts(replace ? items : [...items, ...s.products.filter(p => !p.demo)]);
+      s.setProducts(replace ? items : [...items, ...s.products]);
       setMsg(`${items.length} ürün içe aktarıldı.`); setTxt('');
     } catch { setMsg('Biçim hatalı. Şablonu kontrol edin.'); }
   };
@@ -151,13 +150,13 @@ export default function More({ s }: { s: Store }) {
             <pre>{CSV_TEMPLATE}</pre>
             <textarea rows={5} value={txt} onChange={e => setTxt(e.target.value)} placeholder="CSV veya JSON yapıştırın" />
             <div className="row">
-              <button className="btn" disabled={!txt.trim()} onClick={() => doImport(true)}>Demo verinin yerine koy</button>
+              <button className="btn" disabled={!txt.trim()} onClick={() => doImport(true)}>Mevcut verinin yerine koy</button>
               <button className="btn ghost" disabled={!txt.trim()} onClick={() => doImport(false)}>Ekle</button>
             </div>
             {msg && <p className="hint">{msg}</p>}
           </section>
           <section className="card">
-            <button className="btn ghost" onClick={() => { s.setProducts(makeSeed()); setMsg('Demo veri yüklendi.'); }}>Demo veriyi geri yükle</button>
+            <button className="btn danger" onClick={() => { if (confirm('Tüm ürün verisi ve biriken geçmiş silinsin mi?')) { s.setProducts([]); s.setSnap({ items: {}, syncs: [] }); } }}>Tüm ürün verisini sil</button>
             <button className="btn danger" onClick={() => { if (confirm('Tüm numuneler silinsin mi?')) s.setSamples([]); }}>Numuneleri sıfırla</button>
           </section>
         </>

@@ -17,16 +17,15 @@ const TABS = [
 export default function App() {
   const store = useStore();
   const [tab, setTab] = useState<(typeof TABS)[number]['id']>('radar');
-  const demo = store.products.some(p => p.demo);
   return (
     <div className="app">
       <header className="top">
         <div><b>Inditex Radar</b><small>Sipariş Öngörü Platformu</small></div>
-        {demo && <span className="demo-pill" title="Gösterilen veriler örnektir">DEMO VERİ</span>}
+        <span className="count-pill">{store.products.length} ürün</span>
       </header>
       <main>
-        {tab === 'radar' && <Radar s={store} />}
-        {tab === 'analiz' && <Analysis s={store} />}
+        {tab === 'radar' && <Radar s={store} go={() => setTab('daha')} />}
+        {tab === 'analiz' && <Analysis s={store} go={() => setTab('daha')} />}
         {tab === 'takvim' && <Calendar s={store} />}
         {tab === 'numune' && <Samples s={store} />}
         {tab === 'daha' && <More s={store} />}
