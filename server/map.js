@@ -54,7 +54,36 @@ export function stockState(v) {
   return 'in';
 }
 
+/** rl1987/zara-api-scraper çıktısı (Zara'ya özel). Detay modu (PDP) kapalıysa beden, kumaş ve menşe gelmez. */
+function mapZaraApi(raw) {
+  const img = raw.colors?.flatMap(c => c.images ?? []).find(Boolean);
+  const state = stockState(raw.availability);
+  const price = typeof raw.price === 'number' ? raw.price : null;
+  const fam = [raw.family_name, raw.subfamily_name, raw.name].filter(Boolean).join(' ');
+  const sec = String(raw.section_name ?? '');
+  return {
+    id: `zara:${raw.id}`,
+    brand: 'Zara',
+    name: raw.name ?? `Ürün ${raw.display_reference ?? raw.id}`,
+    category: categoryTR(fam),
+    gender: /KID|BOY|GIRL|BABY|CHILD|NI[ÑN]/i.test(sec) ? 'Çocuk' : /^MAN|^MEN|HOMBRE/i.test(sec) ? 'Erkek' : 'Kadın',
+    color: raw.colors?.[0]?.name || '-',
+    composition: '-',
+    origin: '-',
+    price,
+    originalPrice: typeof raw.old_price === 'number' ? raw.old_price : null,
+    currency: raw.currency ?? 'EUR',
+    launched: null,
+    rank: null,
+    comingSoon: /coming/i.test(String(raw.availability)),
+    isLook: String(raw.name).toUpperCase() === 'LOOK',
+    sizes: [{ size: 'ALL', state }],
+    image: img ? String(img).replace('{width}', '300') : '',
+  };
+}
+
 export function mapItem(raw) {
+  if (raw?.product_id == null && raw?.id != null && raw?.availability !== undefined && raw?.reference) return mapZaraApi(raw);
   if (raw?.product_id == null) return null;
   const comingSoon = raw.visibility === 'COMING_SOON';
   const isLook = raw.product_type === 'Bundle'; // Zara "LOOK": kombin, tek ürün değil
@@ -78,6 +107,7 @@ export function mapItem(raw) {
     origin: originTR(mostCommon((raw.variants ?? []).map(v => v.origin))),
     price,
     originalPrice: typeof raw.old_price === 'number' ? raw.old_price : null,
+    currency: raw.currency ?? 'EUR',
     launched: String(raw.first_visible_date ?? raw.availability_date ?? '').slice(0, 10) || null,
     rank: raw.grid_position ?? null,        // Zara "THE NEW" sıralaması
     comingSoon,

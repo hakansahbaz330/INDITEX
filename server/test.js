@@ -56,6 +56,17 @@ assert.equal(categoryTR('Sneakers'), 'Ayakkabı & Aksesuar');
 assert.equal(categoryTR('COATS'), 'Ceket & Mont');
 assert.equal(categoryTR('TROUSERS'), 'Pantolon');
 
+// 2b) rl1987/zara-api-scraper biçimi
+const zfix = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures', 'zara-api.json'), 'utf8'));
+const zm = zfix.map(mapItem);
+assert.ok(zm.every(Boolean));
+assert.equal(zm[0].brand, 'Zara');
+assert.equal(zm[0].currency, 'USD');
+assert.equal(zm[0].category, 'Ayakkabı & Aksesuar');
+assert.equal(zm[1].originalPrice, 79.9);
+assert.equal(zm[2].isLook, true);
+assert.equal(zm[3].comingSoon, true);
+
 // 3) Çok günlü türetme
 const mk = (states, price) => ({ ...mapItem({ ...bs, product_id: 1, price, variants: states.map((s, i) => ({ size: String(i), is_buyable: true, back_soon: s === 'out', origin: 'MAROKKO' })) }), launched: '2026-01-01' });
 const d = { items: {}, syncs: [] };

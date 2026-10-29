@@ -5,7 +5,7 @@ import { WEIGHT_LABELS, groupAvg, score, signals, stockoutEta, verdict } from '.
 import FilterBar from '../FilterBar';
 import Empty from '../Empty';
 import { groupOf, knitOf, passes } from '../classify';
-import { Badge, Bar, ScoreRing, Spark, originFlag, proximity } from '../ui';
+import { Badge, Bar, ScoreRing, Spark, money, originFlag, proximity } from '../ui';
 
 const BRANDS: ('Hepsi' | Brand)[] = ['Hepsi', 'Zara', 'Bershka', 'Pull&Bear', 'Stradivarius', 'Massimo Dutti', 'Oysho'];
 
@@ -92,7 +92,7 @@ function Detail({ p, s, onClose }: { p: Product; s: Store; onClose: () => void }
           <ScoreRing value={sc} />
         </div>
         <div className="kv">
-          <div><span>Fiyat</span><b>€{p.price.toFixed(2)}</b></div>
+          <div><span>Fiyat</span><b>{money(p)}</b></div>
           <div><span>Renk</span><b>{p.color}</b></div>
           <div><span>Kumaş</span><b>{p.fabric}</b></div>
           <div><span>Kalıp</span><b>{p.fit}</b></div>

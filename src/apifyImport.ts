@@ -24,6 +24,7 @@ export function importApify(text: string, db: SnapDB): ImportResult {
   const looks = all.filter(m => m!.isLook).length;
   const soon = all.filter(m => !m!.isLook && m!.comingSoon).length;
   const keep = all.filter(m => !m!.isLook && !m!.comingSoon && !EXCLUDE_BRANDS.includes(m!.brand) && !EXCLUDE_CATS.includes(String(m!.category)));
+  if (!keep.length) throw new Error(`Dosyada işinize uyan giyim ürünü yok. ${all.length} üründen ${looks} kombin, ${soon} “yakında çıkacak” ve ${all.length - looks - soon} ayakkabı/aksesuar/iç giyim/Zara Home olarak ayıklandı. Apify’da başka bir kategori seçip yeniden çalıştırın.`);
   const date = String(raw.find((r: { sourceObservedAt?: string }) => r?.sourceObservedAt)?.sourceObservedAt ?? new Date().toISOString()).slice(0, 10);
   const next: SnapDB = JSON.parse(JSON.stringify(db));
   record(next, keep, date);

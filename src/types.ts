@@ -9,7 +9,8 @@ export interface Product {
   color: string;
   fabric: string;
   fit: string;
-  price: number;           // EUR
+  price: number;
+  currency?: string;       // EUR, USD …
   origin: string;          // ürün sayfasındaki "Made in"
   daysOnline: number;      // koleksiyona giriş yaşı
   sizesTotal: number;
