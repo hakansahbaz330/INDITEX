@@ -48,3 +48,4 @@ pre{background:var(--bg);padding:8px;border-radius:8px;overflow:auto;font-size:1
 details.card summary{cursor:pointer}input[type=file]{width:100%;margin:8px 0;color:var(--text)}
 .thumb{position:relative}.thumb img{position:absolute;inset:0}
 .count-pill{font-size:12px;color:var(--mute);border:1px solid var(--line);padding:3px 10px;border-radius:99px}.empty-state{text-align:center;padding:32px 8px}.empty-state h3{margin:0 0 8px}.empty-state ol{text-align:left;max-width:340px;margin:12px auto;color:var(--mute);font-size:14px;display:grid;gap:6px}.cal-row i.btn-cell{cursor:pointer}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:360px}.tbl th{color:var(--mute);font-weight:600;text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}.tbl td{padding:8px 4px;border-bottom:1px solid var(--line)}.tbl tr{cursor:pointer}.tbl tr.sel td{color:var(--accent);font-weight:700}.plain a{color:var(--accent)}

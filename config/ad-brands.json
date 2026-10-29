@@ -1,0 +1,52 @@
+{
+  "countries": [
+    "DE",
+    "ES",
+    "FR",
+    "IT",
+    "GB",
+    "PT"
+  ],
+  "brands": [
+    {
+      "name": "Zara",
+      "pageId": "33331950906"
+    },
+    {
+      "name": "Bershka",
+      "search": "Bershka"
+    },
+    {
+      "name": "Pull&Bear",
+      "search": "Pull&Bear"
+    },
+    {
+      "name": "Stradivarius",
+      "search": "Stradivarius"
+    },
+    {
+      "name": "Massimo Dutti",
+      "search": "Massimo Dutti"
+    },
+    {
+      "name": "Oysho",
+      "search": "Oysho"
+    },
+    {
+      "name": "H&M",
+      "search": "H&M"
+    },
+    {
+      "name": "Mango",
+      "search": "Mango"
+    },
+    {
+      "name": "Uniqlo",
+      "search": "Uniqlo"
+    },
+    {
+      "name": "Primark",
+      "search": "Primark"
+    }
+  ]
+}

@@ -32,11 +32,19 @@ jobs:
 
       - name: Apify'dan veri çek
         if: github.event_name != 'push'
+        continue-on-error: true
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_TASK_ID: ${{ secrets.APIFY_TASK_ID }}
           APIFY_MAX_USD: ${{ vars.APIFY_MAX_USD || '2' }}
         run: node scripts/sync.mjs
+
+      - name: Meta Reklam Kitaplığı'ndan reklam verisi çek
+        if: github.event_name != 'push'
+        continue-on-error: true
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+        run: node scripts/sync-ads.mjs
 
       - name: Veriyi depoya kaydet
         if: github.event_name != 'push'
