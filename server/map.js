@@ -26,8 +26,8 @@ const CAT = [
   [/\bbra\b|underwear|lingerie|brief|pyjama|pajama/i, 'İç Giyim'],
   [/knit|sweater|jersey|cardigan|pullover|strick|triko/i, 'Triko'], [/sweat|hoodie/i, 'Sweatshirt'],
   [/denim|jean/i, 'Denim'], [/coat|jacket|bomber|blazer|outwear|parka|anorak|mantel|jacke|puffer|trench|vest/i, 'Ceket & Mont'],
-  [/trouser|pant|legging|jogger|cargo/i, 'Pantolon'], [/shirt(?!.*t)|blouse|bluse|hemd/i, 'Gömlek'],
-  [/t.?shirt|\btop|tank|bodysuit|polo/i, 'Tişört'], [/dress|kleid|jumpsuit/i, 'Elbise'], [/skirt|rock/i, 'Etek'],
+  [/trouser|pant|legging|jogger|cargo/i, 'Pantolon'], [/t[\s-]?shirt|\btee\b|\btops?\b|tank|bodysuit|polo/i, 'Tişört'],
+  [/shirt|blouse|bluse|hemd/i, 'Gömlek'], [/dress|kleid|jumpsuit/i, 'Elbise'], [/skirt|rock/i, 'Etek'],
   [/suit|set|co-?ord|tracksuit/i, 'Takım & Set'],
 ];
 export const categoryTR = fam => {

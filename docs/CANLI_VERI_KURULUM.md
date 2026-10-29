@@ -17,3 +17,12 @@ Akış: Apify aktörü → `server/` (token burada, ortam değişkeninde) → g�
 - İlk çekimde tüm ürünlerin "koleksiyonda gün" değeri 0'dır (aktör bir çıkış tarihi vermiyorsa).
 - Sunucu tek kullanıcılı ve dosya tabanlıdır; çoklu kullanıcı için veritabanına geçin.
 - Test: `npm run test:server` (sentetik veri ve sahte Apify sunucusu kullanır, token gerekmez).
+
+## Gerçek çıktıdan öğrendiklerimiz (29.10.2026, 100 satırlık örnek, overview modu)
+- **Üretim ülkesi geliyor:** `variants[].origin` (ör. "CHINA KONTINENTAL", "MAROKKO", "KAMBODSCHA"). Almanca yazılır; `map.js` Türkçeye çevirir. Örnekte Çin, Vietnam, Fas, Bangladeş, Kamboçya, Portekiz görüldü. Zara'da overview modunda yok.
+- **Beden verisi:** Zara hariç markalarda `variants[]` içinde `size`, `is_buyable`, `back_soon` var. Zara overview'da beden yok, yalnızca ürün düzeyi `availability` ve "THE NEW" sıralaması (`grid_position`). **Zara için detail modu gerekir** (daha pahalı olabilir).
+- **Tükendi tanımı (varsayım):** `back_soon=true` olan beden "şu an yok" sayılıyor. COMING_SOON ürünlerde tüm bedenler true olduğundan o ürünler kaydedilmiyor. Doğrulamak için aynı ürünü birkaç gün izleyin.
+- **Çıkış tarihi var:** `availability_date` → "koleksiyonda gün" gerçek tarihle hesaplanır.
+- **Dışarıda bırakılanlar:** Zara "LOOK" (Bundle) kombinleri, Zara Home, ayakkabı/aksesuar, iç giyim (`EXCLUDE_BRANDS`, `EXCLUDE_CATEGORIES` ile değiştirilir).
+- **Gelmeyenler:** indirim alanları örnekte boş (`old_price` hep null), cinsiyet açık gelmiyor (bölüm adından tahmin), kalıp yok. Kumaş içeriği Almanca ("wolle").
+- Örnekteki 9 satır `server/fixtures/sample.json` olarak testte kullanılıyor.
