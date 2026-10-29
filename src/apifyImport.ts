@@ -15,7 +15,10 @@ export function importApify(text: string, db: SnapDB): ImportResult {
   const raw = JSON.parse(text);
   if (!Array.isArray(raw)) throw new Error('Dosya bir ürün listesi değil. Apify’dan JSON olarak indirdiğinizden emin olun.');
   const all = raw.map(mapItem).filter(Boolean) as ReturnType<typeof mapItem>[];
-  if (!all.length) throw new Error('Dosyada tanınan ürün yok. Bu dosya Inditex Product Scraper çıktısı mı?');
+  if (!all.length) {
+    const keys = Object.keys(raw.find((r: unknown) => r && typeof r === 'object') ?? {}).slice(0, 40).join(', ');
+    throw new Error(`Bu dosyanın biçimi tanınmadı. Şimdilik yalnızca “Inditex Product Scraper” çıktısı okunuyor. İlk üründeki alanlar: ${keys || '(boş dosya)'}`);
+  }
   const looks = all.filter(m => m!.isLook).length;
   const soon = all.filter(m => !m!.isLook && m!.comingSoon).length;
   const keep = all.filter(m => !m!.isLook && !m!.comingSoon && !EXCLUDE_BRANDS.includes(m!.brand) && !EXCLUDE_CATS.includes(String(m!.category)));
