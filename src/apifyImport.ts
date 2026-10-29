@@ -10,6 +10,8 @@ const EXCLUDE_CATS = ['Ayakkabı & Aksesuar', 'İç Giyim'];
 
 export interface ImportResult { db: SnapDB; products: Product[]; date: string; total: number; used: number; looks: number; soon: number; other: number; days: number }
 
+export const fromSnap = (db: SnapDB) => derive(db) as Product[];
+
 /** Apify'dan indirilen JSON dizisini okur, günün anlık görüntüsü olarak ekler. */
 export function importApify(text: string, db: SnapDB): ImportResult {
   const raw = JSON.parse(text);

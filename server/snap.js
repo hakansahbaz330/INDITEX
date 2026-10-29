@@ -47,3 +47,9 @@ export function derive(db, now = today()) {
     };
   });
 }
+
+/** Dosya büyümesin: her ürün için ilk anlık görüntü + son N tanesi kalır. */
+export function prune(db, keep = 60) {
+  for (const e of Object.values(db.items)) if (e.snaps.length > keep) e.snaps = [e.snaps[0], ...e.snaps.slice(-(keep - 1))];
+  return db;
+}

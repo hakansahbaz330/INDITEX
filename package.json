@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
     "server": "node server/index.js",
-    "test:server": "node server/test.js"
+    "test:server": "node server/test.js && node server/test-sync.js"
   },
   "dependencies": {
     "react": "^18.3.1",

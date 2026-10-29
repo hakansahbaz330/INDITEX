@@ -106,7 +106,7 @@ export default function More({ s }: { s: Store }) {
         <>
           <section className="card accent">
             <h3>Apify dosyası yükle</h3>
-            <p className="hint"><b>1.</b> Apify’da aktörü çalıştırın. <b>2.</b> Bitince sonuç (Output/Dataset) sayfasından <b>Export → JSON</b> ile indirin. <b>3.</b> Aşağıdan o dosyayı seçin. Her gün yeni dosya yüklerseniz uygulama geçmişi biriktirir ve tükenme hızını hesaplar.</p>
+            <p className="hint"><b>1.</b> Apify’da aktörü çalıştırın. <b>2.</b> Bitince sonuç (Output/Dataset) sayfasından <b>Export → JSON</b> ile indirin. <b>3.</b> Aşağıdan o dosyayı seçin. Otomatik güncelleme kuruluysa buna gerek yok. Elle yüklüyorsanız, her gün yeni dosya yüklerseniz uygulama geçmişi biriktirir ve tükenme hızını hesaplar.</p>
             <input id="apify-file" type="file" accept=".json,application/json" onChange={e => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
             {up && <p className="hint">{up}</p>}
             {s.snap.syncs.length > 0 && <button className="link" onClick={() => { if (confirm('Biriken tüm geçmiş silinsin mi?')) s.setSnap({ items: {}, syncs: [] }); }}>Biriken geçmişi sil</button>}
