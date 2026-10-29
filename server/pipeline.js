@@ -10,6 +10,6 @@ export function prepare(raw) {
   const looks = all.filter(m => m.isLook).length;
   const soon = all.filter(m => !m.isLook && m.comingSoon).length;
   const keep = all.filter(m => !m.isLook && !m.comingSoon && !EXCLUDE_BRANDS.includes(m.brand) && !EXCLUDE_CATS.includes(m.category));
-  const date = String(raw.find(r => r?.sourceObservedAt)?.sourceObservedAt ?? new Date().toISOString()).slice(0, 10);
+  const date = String(raw.find(r => r?.sourceObservedAt || r?.scrapedAt)?.sourceObservedAt ?? raw.find(r => r?.scrapedAt)?.scrapedAt ?? new Date().toISOString()).slice(0, 10);
   return { keep, date, stats: { total: raw.length, used: keep.length, looks, soon, other: all.length - keep.length - looks - soon, unmapped: raw.length - all.length } };
 }

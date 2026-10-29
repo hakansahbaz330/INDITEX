@@ -1,6 +1,6 @@
 # Otomatik günlük veri (GitHub Actions + Apify)
 
-Akış: her gün GitHub, Apify'daki **kayıtlı görevinizi** çalıştırır → sonuç `data/snapshots.json` dosyasına eklenir → uygulama güncellenip yayınlanır. Bilgisayar veya sunucu gerekmez.
+Akış: her gün GitHub, Apify'daki **kayıtlı görevinizi** çalıştırır → sonuç `public/data/snapshots.json` dosyasına eklenir → uygulama güncellenip yayınlanır. Bilgisayar veya sunucu gerekmez.
 
 ## Bir kerelik kurulum (telefondan yapılabilir)
 1. **Apify'da görev (Task) oluşturun.** Aktör sayfasında istediğiniz ayarları yapın (marka, ülke, kategori, ürün sayısı), sonra **"Save as a new task"**. Görev sayfasının adresindeki kimliği veya `kullanici~gorev-adi` adını not edin. Görevin "Run options" bölümünde "Maximum cost per run"ı bir sınıra çekin.
@@ -13,7 +13,7 @@ Akış: her gün GitHub, Apify'daki **kayıtlı görevinizi** çalıştırır �
 
 ## Güvenlik ve gizlilik
 - Token yalnızca GitHub Secrets'ta durur, uygulamaya veya depoya yazılmaz.
-- **Depo herkese açık.** `data/snapshots.json` (Inditex'in herkese açık ürün bilgileri ve türetilen sinyaller) ve yayınlanan site herkesçe görülebilir. Gizli kalması gerekiyorsa depoyu özel yapın; ancak özel depoda Pages ücretli GitHub planı gerektirir.
+- **Depo herkese açık.** `public/data/snapshots.json` (Inditex'in herkese açık ürün bilgileri ve türetilen sinyaller) ve yayınlanan site herkesçe görülebilir. Gizli kalması gerekiyorsa depoyu özel yapın; ancak özel depoda Pages ücretli GitHub planı gerektirir.
 - Numuneleriniz ve ayarlarınız sitede değil, yalnızca kendi tarayıcınızda saklanır.
 
 ## Maliyet

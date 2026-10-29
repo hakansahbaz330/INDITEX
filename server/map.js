@@ -22,7 +22,7 @@ export const originTR = o => (o ? (ORIGIN.find(([re]) => re.test(o))?.[1] ?? o) 
 
 // Ürün ailesi (İng./Alm./İsp. karışık) → uygulamanın Türkçe kategorileri
 const CAT = [
-  [/shoe|boot|sneaker|sandal|jewel|\bcap\b|sock|\bbag|belt|scarf|hat\b|glove/i, 'Ayakkabı & Aksesuar'],
+  [/shoe|boot|sneaker|trainer|bambas|calzado|zapato|flats|blucher|derby|loafer|mule|sandal|jewel|\bcap\b|sock|\bbag|belt|scarf|hat\b|glove/i, 'Ayakkabı & Aksesuar'],
   [/\bbra\b|underwear|lingerie|brief|pyjama|pajama/i, 'İç Giyim'],
   [/cardigan|hırka|strickjacke|cardi\b/i, 'Hırka'], [/\bvest|gilet|waistcoat|weste/i, 'Yelek'],
   [/knit|sweater|jersey|pullover|strick|triko/i, 'Triko'], [/sweat|hoodie/i, 'Sweatshirt'],

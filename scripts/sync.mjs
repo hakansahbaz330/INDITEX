@@ -5,7 +5,7 @@ import { runAndFetch } from '../server/apify.js';
 import { prepare } from '../server/pipeline.js';
 import { record, prune } from '../server/snap.js';
 
-const FILE = process.env.DATA_FILE || path.join(import.meta.dirname, '..', 'data', 'snapshots.json');
+const FILE = process.env.DATA_FILE || path.join(import.meta.dirname, '..', 'public', 'data', 'snapshots.json');
 const raw = await runAndFetch({
   base: process.env.APIFY_BASE, token: process.env.APIFY_TOKEN, taskId: process.env.APIFY_TASK_ID,
   actor: process.env.APIFY_ACTOR, input: process.env.APIFY_INPUT ? JSON.parse(process.env.APIFY_INPUT) : undefined,
