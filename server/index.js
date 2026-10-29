@@ -44,7 +44,7 @@ export const server = http.createServer(async (req, res) => {
   if (u.pathname.startsWith('/api/')) {
     if (APP_KEY && req.headers['x-app-key'] !== APP_KEY) return json(res, 401, { error: 'yetkisiz' });
     try {
-      if (u.pathname === '/api/health') return json(res, 200, { ok: true, tokenSet: !!TOKEN, actor: ACTOR });
+      if (u.pathname === '/api/health') return json(res, 200, { ok: true, tokenSet: !!TOKEN, actor: ACTOR, inputOk: fs.existsSync(INPUT_FILE), appKeySet: !!APP_KEY, maxUsd: MAX_USD, snapshots: load().syncs.length });
       if (u.pathname === '/api/products') { const db = load(); return json(res, 200, { syncs: db.syncs.slice(-5), products: derive(db) }); }
       if (u.pathname === '/api/sync' && req.method === 'POST') return json(res, 200, await sync());
       if (u.pathname === '/api/debug/sample') return json(res, 200, { keys: lastRaw ? Object.keys(lastRaw) : [], sample: lastRaw });

@@ -37,12 +37,18 @@ export default function More({ s }: { s: Store }) {
   const [srv, setSrv] = useState(() => { try { return JSON.parse(localStorage.getItem('ir.server') ?? '{}'); } catch { return {}; } });
   const [busy, setBusy] = useState(false);
   const [live, setLive] = useState('');
+  const [health, setHealth] = useState<null | { tokenSet: boolean; inputOk: boolean; appKeySet: boolean; maxUsd: string; snapshots: number } | 'yok'>(null);
   const saveSrv = (v: { url?: string; key?: string }) => { setSrv(v); try { localStorage.setItem('ir.server', JSON.stringify(v)); } catch { /* yoksay */ } };
   const call = async (path: string, init?: RequestInit) => {
     const r = await fetch(`${srv.url ?? ''}${path}`, { ...init, headers: { 'x-app-key': srv.key ?? '' } });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error ?? `HTTP ${r.status}`);
     return j;
+  };
+  const check = async () => {
+    setBusy(true);
+    try { setHealth(await call('/api/health')); } catch { setHealth('yok'); }
+    setBusy(false);
   };
   const pull = async (sync: boolean) => {
     setBusy(true); setLive('');
@@ -98,6 +104,17 @@ export default function More({ s }: { s: Store }) {
               <button className="btn" disabled={busy} onClick={() => pull(false)}>Kayıtlı veriyi yükle</button>
               <button className="btn ghost" disabled={busy} onClick={() => confirm("Apify çalıştırılır ve maliyet doğurur. Devam?") && pull(true)}>Şimdi Apify'dan çek</button>
             </div>
+            <button className="btn ghost" disabled={busy} onClick={check}>Bağlantıyı kontrol et</button>
+            {health === 'yok' && <p className="hint">✗ Sunucuya ulaşılamadı. Sunucuyu başlatın (<code>npm run server</code>) ve adresi kontrol edin.</p>}
+            {health && health !== 'yok' && (
+              <ul className="plain">
+                <li>✓ Sunucu çalışıyor</li>
+                <li>{health.tokenSet ? '✓ Apify token tanımlı' : '✗ APIFY_TOKEN tanımlı değil (ortam değişkeni olarak ekleyin)'}</li>
+                <li>{health.inputOk ? '✓ server/input.json var' : '✗ server/input.json yok (Apify JSON sekmesinden kaydedin)'}</li>
+                <li>{health.appKeySet ? '✓ Uygulama parolası açık' : '• Uygulama parolası (APP_KEY) tanımlı değil; internete açacaksanız ekleyin'}</li>
+                <li>• Çalıştırma başına maliyet tavanı: ${health.maxUsd} · kayıtlı çekim: {health.snapshots}</li>
+              </ul>
+            )}
             {live && <p className="hint">{live}</p>}
           </section>
           <section className="card">
