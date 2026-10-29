@@ -31,6 +31,6 @@ export const Bar = ({ value, label }: { value: number; label: string }) => (
 );
 
 export const originFlag = (o: string) =>
-  ({ 'Türkiye': '🇹🇷', Fas: '🇲🇦', Portekiz: '🇵🇹', 'Çin': '🇨🇳', 'Bangladeş': '🇧🇩', Hindistan: '🇮🇳', Vietnam: '🇻🇳', 'Mısır': '🇪🇬', Pakistan: '🇵🇰' } as Record<string, string>)[o] ?? '🌍';
+  ({ 'Türkiye': '🇹🇷', Fas: '🇲🇦', Portekiz: '🇵🇹', 'Çin': '🇨🇳', 'Bangladeş': '🇧🇩', Hindistan: '🇮🇳', Vietnam: '🇻🇳', 'Mısır': '🇪🇬', Pakistan: '🇵🇰', 'Kamboçya': '🇰🇭', 'Sri Lanka': '🇱🇰', Endonezya: '🇮🇩', 'İspanya': '🇪🇸', Myanmar: '🇲🇲' } as Record<string, string>)[o] ?? '🌍';
 
 export const proximity = (p: Product) => ['Türkiye', 'Fas', 'Portekiz', 'İspanya'].includes(p.origin);

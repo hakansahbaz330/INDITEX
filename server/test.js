@@ -1,49 +1,70 @@
-// Token gerektirmeyen test. SENTETİK veri kullanır; gerçek aktör çıktısı değildir.
+// Token gerektirmeyen test. Sahte Apify sunucusu, gerçek aktör çıktısından alınmış 8 satırlık örneği (fixtures/sample.json) döndürür.
 import http from 'node:http';
 import assert from 'node:assert/strict';
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 
+const fixture = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures', 'sample.json'), 'utf8'));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ir-'));
 const mock = http.createServer((req, res) => {
   assert.match(req.url, /run-sync-get-dataset-items\?maxTotalChargeUsd=/);
   assert.equal(req.headers.authorization, 'Bearer TESTTOKEN');
   res.writeHead(200, { 'content-type': 'application/json' });
-  res.end(JSON.stringify([
-    { id: 'A1', brand: 'Zara', name: 'Test Kazak', category: 'Triko', color: 'Ekru', price: '39,95 EUR', sizes: [{ size: 'S', availability: 'in_stock' }, { size: 'M', availability: 'low_on_stock' }, { size: 'L', availability: 'out_of_stock' }] },
-    { noid: true },
-  ]));
+  res.end(JSON.stringify([...fixture, { noid: true }]));
 });
 await new Promise(r => mock.listen(0, r));
 process.env.APIFY_TOKEN = 'TESTTOKEN';
 process.env.APIFY_BASE = `http://localhost:${mock.address().port}`;
 process.env.DATA_FILE = path.join(tmp, 's.json');
 process.env.APIFY_INPUT_FILE = path.join(tmp, 'in.json');
-fs.writeFileSync(process.env.APIFY_INPUT_FILE, '{"brands":["Zara"]}');
+fs.writeFileSync(process.env.APIFY_INPUT_FILE, '{}');
 
 const { sync } = await import('./index.js');
 const { load, record, derive } = await import('./store.js');
-const { mapItem } = await import('./map.js');
+const { mapItem, originTR, categoryTR } = await import('./map.js');
 
+// 1) Uçtan uca: COMING_SOON ve Zara Home kaydedilmez, geçersiz satır atlanır
 const r = await sync();
-assert.deepEqual(r, { fetched: 2, mapped: 1, skipped: 1 });
+assert.equal(r.fetched, fixture.length + 1);
+assert.equal(r.skipped, 1);
+assert.equal(r.comingSoon, fixture.filter(p => p.visibility === 'COMING_SOON').length);
+assert.ok(r.mapped >= 4, 'ürünler kaydedilmeli');
 const db = load();
-assert.equal(db.items.A1.snaps[0].out, 1);
-assert.equal(db.items.A1.snaps[0].price, 39.95);
+assert.ok(!Object.keys(db.items).some(k => k.startsWith('zarahome:')));
 
-// Çok günlü senaryo: 10 gün önce hiç tükenme yok → 3 gün sonra 2 beden tükenir → 5 gün sonra yeniden stok
-const mk = (st, price) => mapItem({ id: 'B2', name: 'X', sizes: st.map((s, i) => ({ size: i, availability: s })), price });
+// 2) Eşleştirme gerçek şemaya göre
+const bs = fixture.find(p => p.brand === 'bershka' && p.visibility === 'SHOW' && p.variants.some(v => v.back_soon));
+const m = mapItem(bs);
+assert.equal(m.brand, 'Bershka');
+assert.ok(m.sizes.some(s => s.state === 'out') && m.sizes.some(s => s.state === 'in'));
+assert.equal(m.launched, '2026-10-26');
+const z = mapItem(fixture.find(p => p.brand === 'zara'));
+assert.equal(mapItem(fixture.find(p => p.product_type === 'Bundle')).isLook, true);
+assert.equal(z.sizes.length, 1);          // overview: yalnızca ürün düzeyi durum
+assert.equal(originTR('KAMBODSCHA (EHEM. KAMPUTSCHEA)'), 'Kamboçya');
+assert.equal(originTR('CHINA KONTINENTAL'), 'Çin');
+assert.equal(originTR('MAROKKO'), 'Fas');
+assert.equal(categoryTR('Knitwear'), 'Triko');
+assert.equal(categoryTR('T SHIRT'), 'Tişört');
+assert.equal(categoryTR('SHIRT'), 'Gömlek');
+assert.equal(categoryTR('Sneakers'), 'Ayakkabı & Aksesuar');
+assert.equal(categoryTR('COATS'), 'Ceket & Mont');
+assert.equal(categoryTR('TROUSERS'), 'Pantolon');
+
+// 3) Çok günlü türetme
+const mk = (states, price) => ({ ...mapItem({ ...bs, product_id: 1, price, variants: states.map((s, i) => ({ size: String(i), is_buyable: true, back_soon: s === 'out', origin: 'MAROKKO' })) }), launched: '2026-01-01' });
 const d = { items: {}, syncs: [] };
-record(d, [mk(['in', 'in', 'in', 'in'], 30)], '2025-01-01');
-record(d, [mk(['in', 'in', 'in', 'in'], 30)], '2025-01-03');
-record(d, [mk(['out', 'out', 'in', 'in'], 30)], '2025-01-04');
-record(d, [mk(['in', 'out', 'in', 'in'], 24)], '2025-01-09');
-const p = derive(d, '2025-01-10').find(x => x.id === 'B2');
+record(d, [mk(['in', 'in', 'in', 'in'], 30)], '2026-01-01');
+record(d, [mk(['in', 'in', 'in', 'in'], 30)], '2026-01-03');
+record(d, [mk(['out', 'out', 'in', 'in'], 30)], '2026-01-04');
+record(d, [mk(['in', 'out', 'in', 'in'], 24)], '2026-01-09');
+const p = derive(d, '2026-01-10')[0];
 assert.equal(p.soldOutDays, 3);
 assert.equal(p.restocks, 1);
 assert.equal(p.markdown, 0.2);
 assert.equal(p.daysOnline, 9);
 assert.equal(p.sizesOut, 1);
-console.log('Tüm testler geçti', { soldOutDays: p.soldOutDays, restocks: p.restocks, markdown: p.markdown });
+assert.equal(p.origin, 'Fas');
+console.log('Tüm testler geçti', r);
 mock.close(); process.exit(0);

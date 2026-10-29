@@ -27,9 +27,13 @@ export async function sync() {
   if (!r.ok) throw Object.assign(new Error(`Apify ${r.status}: ${(await r.text()).slice(0, 200)}`), { code: 502 });
   const raw = await r.json();
   lastRaw = raw[0] ?? null;
-  const mapped = raw.map(mapItem).filter(Boolean);
+  const EXCLUDE = (process.env.EXCLUDE_BRANDS ?? 'Zara Home').split(',').map(x => x.trim());
+  const all = raw.map(mapItem).filter(Boolean);
+  // Satışa henüz çıkmamış (COMING_SOON) ürünlerde bedenler "yok" görünür; stok geçmişini bozmamak için kaydetmiyoruz.
+  const EXCL_CAT = (process.env.EXCLUDE_CATEGORIES ?? 'Ayakkabı & Aksesuar,İç Giyim').split(',').map(x => x.trim());
+  const mapped = all.filter(m => !m.comingSoon && !m.isLook && !EXCLUDE.includes(m.brand) && !EXCL_CAT.includes(m.category));
   const db = load(); record(db, mapped); save(db);
-  return { fetched: raw.length, mapped: mapped.length, skipped: raw.length - mapped.length };
+  return { fetched: raw.length, mapped: mapped.length, skipped: raw.length - all.length, comingSoon: all.filter(m => m.comingSoon).length, excluded: all.length - mapped.length - all.filter(m => m.comingSoon).length };
 }
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };

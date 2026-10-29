@@ -2,7 +2,7 @@ export type Brand = 'Zara' | 'Bershka' | 'Pull&Bear' | 'Stradivarius' | 'Massimo
 
 export interface Product {
   id: string;
-  brand: Brand;
+  brand: Brand | string;
   name: string;
   category: string;
   gender: 'Kadın' | 'Erkek';
@@ -22,6 +22,7 @@ export interface Product {
   trendDelta: number;      // son 4 hafta değişim %
   history: number[];       // son 12 hafta "tükenme oranı" 0..100
   image: string;           // emoji/ikon yer tutucu
+  imageUrl?: string;       // ürün fotoğrafı (canlı veri)
   demo?: boolean;
 }
 
@@ -34,7 +35,7 @@ export type SampleStatus = 'Hazırlanıyor' | 'Gönderildi' | 'Onaylandı' | 'Re
 export interface Sample {
   id: string;
   refId: string;           // ilham alınan ürün
-  brand: Brand;
+  brand: Brand | string;
   title: string;
   category: string;
   score: number;

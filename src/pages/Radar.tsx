@@ -41,7 +41,7 @@ export default function Radar({ s }: { s: Store }) {
       <ul className="list">
         {rows.map(({ p, sc }) => (
           <li key={p.id} onClick={() => setSel(p)}>
-            <div className="thumb">{p.image}</div>
+            <div className="thumb">{p.imageUrl ? <img src={p.imageUrl} alt="" loading="lazy" /> : p.image}</div>
             <div className="meta">
               <b>{p.name}</b>
               <small>{p.brand} · {p.category} · {p.color}</small>
@@ -82,7 +82,7 @@ function Detail({ p, s, onClose }: { p: Product; s: Store; onClose: () => void }
       <div className="sheet" onClick={e => e.stopPropagation()}>
         <button className="close" onClick={onClose} aria-label="Kapat">✕</button>
         <div className="sheet-head">
-          <div className="thumb big">{p.image}</div>
+          <div className="thumb big">{p.imageUrl ? <img src={p.imageUrl} alt="" /> : p.image}</div>
           <div><h2>{p.name}</h2><small>{p.brand} · {p.category} · {p.gender}</small><br /><Badge v={verdict(sc, p)} /></div>
           <ScoreRing value={sc} />
         </div>
