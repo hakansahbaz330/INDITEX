@@ -100,7 +100,7 @@ function Detail({ p, s, onClose }: { p: Product; s: Store; onClose: () => void }
           <div><span>Üretim yeri</span><b>{originFlag(p.origin)} {p.origin}{proximity(p) ? ' · yakın tedarik' : ''}</b></div>
           <div><span>Koleksiyonda</span><b>{p.daysOnline} gün</b></div>
           <div><span>Tahmini tükenme</span><b>{stockoutEta(p)}</b></div>
-          {p.demand && <div><span>Zara talep işareti</span><b>{/HIGH|PEAK/i.test(p.demand) ? 'Yüksek' : /LOW/i.test(p.demand) ? 'Düşük' : 'Normal'}</b></div>}
+          {p.demand && <div><span>Zara talep işareti</span><b>{/RUNNING_OUT/i.test(p.demand) ? 'Tükenmek üzere' : /HIGH|PEAK/i.test(p.demand) ? 'Yüksek' : /LOW/i.test(p.demand) ? 'Düşük' : 'Normal'}</b></div>}
           <div><span>Yeniden stok</span><b>{p.restocks}×</b></div>
         </div>
         <h3>Sinyal dökümü</h3>

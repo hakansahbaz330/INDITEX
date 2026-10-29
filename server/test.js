@@ -82,6 +82,14 @@ assert.equal(mapItem({ ...JSON.parse(fs.readFileSync(path.join(import.meta.dirna
 assert.equal(zs[0].demand, 'DEMAND_REGULAR');
 assert.equal(zs[0].originalPrice, null);         // "N/A"
 
+// 2d) DEMAND_RUNNING_OUT → beden "az kaldı" olur, ürün talep işareti en yüksek öncelikle gelir
+const ro = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures', 'zara-scraper.json'), 'utf8'))[0];
+ro.sizes[1].demand = 'DEMAND_RUNNING_OUT'; ro.sizes[2].demand = 'DEMAND_HIGH';
+const rm = mapItem(ro);
+assert.equal(rm.sizes[1].state, 'low');
+assert.equal(rm.sizes[2].state, 'in');
+assert.equal(rm.demand, 'DEMAND_RUNNING_OUT');
+
 // 3) Çok günlü türetme
 const mk = (states, price) => ({ ...mapItem({ ...bs, product_id: 1, price, variants: states.map((s, i) => ({ size: String(i), is_buyable: true, back_soon: s === 'out', origin: 'MAROKKO' })) }), launched: '2026-01-01' });
 const d = { items: {}, syncs: [] };

@@ -70,9 +70,13 @@ function mapZaraScraper(raw) {
   if (raw.error) return null;
   const sec = String(raw.section ?? '');
   const last = String(raw.categoryPath ?? '').split('>').pop();
-  const sizes = raw.sizes.map(s => ({ size: String(s.size), state: stockState(s.availability) }));
+  // Zara'nın kendi talep işareti: DEMAND_RUNNING_OUT = beden tükenmek üzere → "az kaldı" sayılır
+  const sizes = raw.sizes.map(s => {
+    const st = stockState(s.availability);
+    return { size: String(s.size), state: st === 'in' && /RUNNING_OUT/i.test(String(s.demand)) ? 'low' : st };
+  });
   const demands = raw.sizes.map(s => String(s.demand ?? '')).filter(Boolean);
-  const rank = d => (/HIGH|PEAK|HOT/i.test(d) ? 2 : /LOW/i.test(d) ? 0 : 1);
+  const rank = d => (/RUNNING_OUT/i.test(d) ? 3 : /HIGH|PEAK|HOT/i.test(d) ? 2 : /LOW/i.test(d) ? 0 : 1);
   const demand = demands.sort((a, b) => rank(b) - rank(a))[0];
   return {
     id: `zara:${raw.productId}`,
@@ -132,7 +136,7 @@ export function mapItem(raw) {
   const isLook = raw.product_type === 'Bundle'; // Zara "LOOK": kombin, tek ürün değil
   let sizes;
   if (Array.isArray(raw.variants) && raw.variants.length) {
-    sizes = raw.variants.map(v => ({ size: String(v.size), state: v.is_buyable === false || v.back_soon === true ? 'out' : 'in' }));
+    sizes = raw.variants.map(v => ({ size: String(v.size), state: v.is_buyable === false || v.back_soon === true ? 'out' : /RUNNING_OUT/i.test(String(v.demand)) ? 'low' : 'in' }));
   } else {
     // Zara overview: beden yok, yalnızca ürün düzeyi durum
     sizes = [{ size: 'ALL', state: stockState(raw.availability ?? raw.colors?.[0]?.availability) }];
