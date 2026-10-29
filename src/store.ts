@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Product, Sample, Weights } from './types';
 import { DEFAULT_WEIGHTS } from './scoring';
 import { DEFAULT_FILTERS, type Filters } from './classify';
+import { emptyDB, type SnapDB } from './apifyImport';
 import { makeSeed } from './seed';
 
 function useLocal<T>(key: string, init: () => T): [T, (v: T) => void] {
@@ -19,8 +20,9 @@ export function useStore() {
   const [w, setWeights] = useLocal<Weights>('ir.weights', () => DEFAULT_WEIGHTS);
   const weights = { ...DEFAULT_WEIGHTS, ...w };
   const [filters, setFilters] = useLocal<Filters>('ir.filters', () => DEFAULT_FILTERS);
+  const [snap, setSnap] = useLocal<SnapDB>('ir.snap', emptyDB);
   const [watch, setWatch] = useLocal<string[]>('ir.watch', () => []);
-  return { products, setProducts, samples, setSamples, weights, setWeights, watch, setWatch, filters, setFilters };
+  return { products, setProducts, samples, setSamples, weights, setWeights, watch, setWatch, filters, setFilters, snap, setSnap };
 }
 export type Store = ReturnType<typeof useStore>;
 

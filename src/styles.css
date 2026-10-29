@@ -45,3 +45,5 @@ main{padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));pad
 pre{background:var(--bg);padding:8px;border-radius:8px;overflow:auto;font-size:11px}
 .thumb{overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}
 .fbar .chips{padding:4px 0}.chips small{opacity:.7;margin-left:4px;color:inherit}
+details.card summary{cursor:pointer}input[type=file]{width:100%;margin:8px 0;color:var(--text)}
+.thumb{position:relative}.thumb img{position:absolute;inset:0}

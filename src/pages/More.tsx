@@ -4,6 +4,7 @@ import { CSV_TEMPLATE, parseImport } from '../store';
 import { DEFAULT_WEIGHTS, WEIGHT_LABELS } from '../scoring';
 import { makeSeed } from '../seed';
 import type { Product, Weights } from '../types';
+import { importApify } from '../apifyImport';
 
 const SOURCES = [
   { n: 'Hazır toplayıcılar (Apify: Inditex Product Scraper vb.)', v: 'Yüksek', r: 'Orta-Yüksek', d: '7 marka, beden bazlı stok durumu, fiyat, kumaş. Stok çoğunlukla katalog durumudur, mağaza adedi değildir. Günlük çekimle tükenme hızı türetilir. Ters mühendislik kullananlar daha riskli.' },
@@ -36,6 +37,15 @@ export default function More({ s }: { s: Store }) {
   const [msg, setMsg] = useState('');
   const [srv, setSrv] = useState(() => { try { return JSON.parse(localStorage.getItem('ir.server') ?? '{}'); } catch { return {}; } });
   const [busy, setBusy] = useState(false);
+  const [up, setUp] = useState('');
+  const onFile = async (f?: File) => {
+    if (!f) return;
+    try {
+      const r = importApify(await f.text(), s.snap);
+      s.setSnap(r.db); s.setProducts(r.products);
+      setUp(`✓ ${r.used} ürün yüklendi (${r.date}). Atlanan: ${r.looks} kombin, ${r.soon} “yakında çıkacak”, ${r.other} ayakkabı/aksesuar/iç giyim/Zara Home. Kayıtlı gün sayısı: ${r.days}.${r.days < 2 ? ' Tükenme hızı için aynı dosyayı birkaç gün sonra yeniden indirip yükleyin.' : ''}`);
+    } catch (e) { setUp(`✗ ${(e as Error).message}`); }
+  };
   const [live, setLive] = useState('');
   const [health, setHealth] = useState<null | { tokenSet: boolean; inputOk: boolean; appKeySet: boolean; maxUsd: string; snapshots: number } | 'yok'>(null);
   const saveSrv = (v: { url?: string; key?: string }) => { setSrv(v); try { localStorage.setItem('ir.server', JSON.stringify(v)); } catch { /* yoksay */ } };
@@ -95,7 +105,15 @@ export default function More({ s }: { s: Store }) {
 
       {tab === 'ayar' && (
         <>
-          <section className="card">
+          <section className="card accent">
+            <h3>Apify dosyası yükle</h3>
+            <p className="hint"><b>1.</b> Apify’da aktörü çalıştırın. <b>2.</b> Bitince sonuç (Output/Dataset) sayfasından <b>Export → JSON</b> ile indirin. <b>3.</b> Aşağıdan o dosyayı seçin. Her gün yeni dosya yüklerseniz uygulama geçmişi biriktirir ve tükenme hızını hesaplar.</p>
+            <input id="apify-file" type="file" accept=".json,application/json" onChange={e => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
+            {up && <p className="hint">{up}</p>}
+            {s.snap.syncs.length > 0 && <button className="link" onClick={() => { if (confirm('Biriken tüm geçmiş silinsin mi?')) s.setSnap({ items: {}, syncs: [] }); }}>Biriken geçmişi sil</button>}
+          </section>
+          <details className="card"><summary><b>Gelişmiş: otomatik sunucu</b></summary>
+          <section>
             <h3>Canlı veri (sunucu)</h3>
             <p className="hint">Sunucu Apify'dan günlük çekim yapıp anlık görüntüleri saklar; tükenme hızı bu geçmişten hesaplanır. Aynı adresten açtıysanız adres alanını boş bırakın.</p>
             <input className="search" placeholder="Sunucu adresi (boş = bu adres)" value={srv.url ?? ''} onChange={e => saveSrv({ ...srv, url: e.target.value.replace(/\/$/, '') })} />
@@ -116,7 +134,7 @@ export default function More({ s }: { s: Store }) {
               </ul>
             )}
             {live && <p className="hint">{live}</p>}
-          </section>
+          </section></details>
           <section className="card">
             <h3>Skor ağırlıkları</h3>
             {(Object.keys(DEFAULT_WEIGHTS) as (keyof Weights)[]).map(k => (
