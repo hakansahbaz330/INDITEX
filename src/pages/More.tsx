@@ -6,6 +6,9 @@ import { makeSeed } from '../seed';
 import type { Weights } from '../types';
 
 const SOURCES = [
+  { n: 'Hazır toplayıcılar (Apify: Inditex Product Scraper vb.)', v: 'Yüksek', r: 'Orta-Yüksek', d: '7 marka, beden bazlı stok durumu, fiyat, kumaş. Stok çoğunlukla katalog durumudur, mağaza adedi değildir. Günlük çekimle tükenme hızı türetilir. Ters mühendislik kullananlar daha riskli.' },
+  { n: 'TikTok Creative Center', v: 'Orta', r: 'Düşük', d: 'Ücretsiz; trend hashtag, ürün ve reklam örneği. API yok, elle takip.' },
+  { n: 'Google Trends API (alpha)', v: 'Orta', r: 'Düşük', d: 'Resmi ama başvuru gerekli; üretim garantisi yok.' },
   { n: 'Marka sitesi: beden/stok durumu', v: 'Çok yüksek', r: 'Orta', d: 'Hangi bedenler/renkler tükendi, ne kadar sürede; en güçlü talep vekili. Kullanım şartlarını kontrol edin; manuel gözlem veya izinli sağlayıcı kullanın.' },
   { n: 'Marka sitesi: “Yeni gelenler” / sıralama', v: 'Yüksek', r: 'Orta', d: 'Ürünün ne zaman listeye girdiği, sıralamadaki yükselişi, yeniden stoklanma.' },
   { n: 'Marka sitesi: bileşim ve menşe', v: 'Yüksek', r: 'Düşük', d: 'Kumaş içeriği ve “Made in” — rakip üretim coğrafyası.' },
